@@ -1,0 +1,127 @@
+.bg-light {
+     background-color: var(--bg-body) !important;
+}
+
+
+.card {
+     background-color: var(--bg-card);
+     transition: all 0.3s ease;
+}
+
+
+.card-header {
+     background-color: var(--bg-card) !important;
+     border-color: var(--border-color) !important;
+}
+
+.hover-text-primary:hover {
+     color: var(--primary-color) !important;
+}
+
+
+
+.hover-shadow:hover {
+     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.transition-all {
+     transition: all 0.2s ease;
+}
+
+.cursor-pointer {
+     cursor: pointer;
+}
+
+
+
+.bg-light-success {
+     background-color: rgba(16, 185, 129, 0.1) !important;
+     color: #10b981 !important;
+}
+
+.bg-light-info {
+     background-color: rgba(6, 182, 212, 0.1) !important;
+     color: #06b6d4 !important;
+}
+
+.bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.1) !important;
+     color: #ef4444 !important;
+}
+
+.bg-light-secondary {
+     background-color: rgba(107, 114, 128, 0.1) !important;
+     color: #6b7280 !important;
+}
+
+.table {
+     --bs-table-bg: transparent !important;
+     --bs-table-color: var(--text-color);
+     --bs-table-border-color: var(--border-color);
+}
+
+
+
+.modern-table tbody td {
+     background-color: transparent !important;
+     color: var(--text-color);
+     padding: 12px 16px;
+     border-bottom: 1px solid var(--border-color);
+     vertical-align: middle;
+}
+
+
+
+.btn-white {
+     background-color: #fff;
+     border-color: #e5e7eb;
+     color: #374151;
+}
+
+.btn-white:hover {
+     background-color: #f9fafb;
+     border-color: #d1d5db;
+}
+
+.tagify__dropdown {
+     z-index: 9999 !important;
+}
+
+.tagify {
+     --tags-border-color: #dee2e6;
+     --tags-hover-border-color: var(--primary-color);
+     --tags-focus-border-color: #86b7fe;
+     background: #fff;
+     border-radius: 0.375rem;
+}
+
+
+
+[data-theme="dark"] .card {
+     border-color: #374151 !important;
+}
+
+
+
+[data-theme="dark"] .list-group-item {
+     background-color: transparent !important;
+     border-color: #374151 !important;
+     color: #f3f4f6 !important;
+}
+
+
+
+[data-theme="dark"] .bg-light-success {
+     background-color: rgba(16, 185, 129, 0.2) !important;
+     color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .bg-light-info {
+     background-color: rgba(6, 182, 212, 0.2) !important;
+     color: #67e8f9 !important;
+}
+
+[data-theme="dark"] .bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.2) !important;
+     color: #fca5a5 !important;
+}

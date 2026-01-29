@@ -1,0 +1,101 @@
+
+
+.bg-light {
+     background-color: var(--bg-body) !important;
+}
+
+
+.card {
+     background-color: var(--bg-card) !important;
+     transition: all 0.3s ease;
+}
+
+
+.card-header,
+.card-footer {
+     background-color: var(--bg-card) !important;
+     border-color: var(--border-color) !important;
+}
+
+/* Custom Select Wrapper */
+.custom-select-wrapper {
+     position: relative;
+     min-width: 140px;
+}
+
+.custom-select-wrapper .icon-wrapper {
+     position: absolute;
+     left: 12px;
+     top: 50%;
+     transform: translateY(-50%);
+     z-index: 5;
+     pointer-events: none;
+     font-size: 16px;
+     color: var(--text-body);
+}
+
+.custom-select-wrapper .form-select {
+     padding-left: 36px !important;
+     cursor: pointer;
+}
+
+/* Soft Backgrounds */
+
+.bg-light-info {
+     background-color: rgba(6, 182, 212, 0.1) !important;
+     color: #06b6d4 !important;
+}
+
+.bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.1) !important;
+     color: #f59e0b !important;
+}
+
+.bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.1) !important;
+     color: #ef4444 !important;
+}
+
+/* Table & Inputs */
+.table {
+     --bs-table-bg: transparent !important;
+     --bs-table-color: var(--text-color);
+     --bs-table-border-color: var(--border-color);
+}
+
+.modern-table tbody td {
+     padding: 1rem;
+     border-bottom: 1px solid var(--border-color);
+     vertical-align: middle;
+}
+
+
+
+
+
+.btn-icon {
+     width: 32px;
+     height: 32px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     padding: 0;
+     border: none;
+     transition: all 0.2s;
+}
+
+.btn-light-warning:hover {
+     background-color: #f59e0b;
+     color: #fff;
+}
+
+.btn-light-danger:hover {
+     background-color: #ef4444;
+     color: #fff;
+}
+
+
+
+[data-theme="dark"] .btn-close {
+     filter: invert(1);
+}

@@ -1,0 +1,75 @@
+body {
+     background-image:
+          linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+          url("/images/ms_banner_img1.jpg");
+     background-size: cover;
+     background-position: center;
+     background-repeat: no-repeat;
+}
+
+.login-card {
+     max-width: 420px;
+     margin: auto;
+}
+
+.btn-danger {
+     background-color: #1f503a;
+     border-color: #1f503a;
+}
+
+.btn-danger:hover {
+     background-color: #184531;
+     border-color: #1f503a;
+}
+
+.btn-danger:focus,
+.btn-danger:focus-visible,
+.btn-danger:active {
+     background-color: #1f503a !important;
+     border-color: #1f503a !important;
+     box-shadow: none !important;
+     outline: none !important;
+}
+
+.btn-danger:disabled {
+     background-color: #1f503a;
+     border-color: #1f503a;
+     opacity: 0.7;
+     cursor: not-allowed;
+     position: relative;
+}
+
+.btn-danger:disabled::after {
+     content: "";
+     position: absolute;
+     right: 16px;
+     top: 50%;
+     transform: translateY(-50%);
+     width: 18px;
+     height: 18px;
+     border: 2px solid #fff;
+     border-top: 2px solid transparent;
+     border-radius: 50%;
+     animation: spin 0.8s linear infinite;
+}
+
+
+.form-control:focus {
+     border-color: #1f503a !important;
+     box-shadow: 0 0 0 1px #1f503a !important;
+     background-color: #fff !important;
+}
+
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .input-group-text {
+    background-color: #1a1d20;
+    border-color: #343a40;
+    color: #e9ecef;
+}
+@keyframes spin {
+     to {
+          transform: translateY(-50%) rotate(360deg);
+     }
+}

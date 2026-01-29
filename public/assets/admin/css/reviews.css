@@ -1,0 +1,106 @@
+.bg-light {
+     background-color: var(--bg-body) !important;
+}
+
+
+
+.card {
+     background-color: var(--bg-card);
+     transition: all 0.3s ease;
+}
+
+
+.card-header,
+.card-footer {
+     background-color: var(--bg-card) !important;
+     border-color: var(--border-color) !important;
+}
+
+/* Custom Select */
+.custom-select-wrapper {
+     position: relative;
+     min-width: 140px;
+}
+
+.custom-select-wrapper .icon-wrapper {
+     position: absolute;
+     left: 12px;
+     top: 50%;
+     transform: translateY(-50%);
+     z-index: 5;
+     pointer-events: none;
+     font-size: 16px;
+}
+
+.custom-select-wrapper .form-select {
+     padding-left: 36px !important;
+     cursor: pointer;
+     transition: border-color 0.2s;
+}
+
+.custom-select-wrapper .form-select:hover {
+     border-color: var(--primary-color);
+}
+
+
+
+.bg-light-success {
+     background-color: rgba(16, 185, 129, 0.1) !important;
+     color: #10b981 !important;
+}
+
+.bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.1) !important;
+     color: #f59e0b !important;
+}
+
+.bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.1) !important;
+     color: #ef4444 !important;
+}
+
+.bg-light-secondary {
+     background-color: rgba(107, 114, 128, 0.1) !important;
+     color: #6b7280 !important;
+}
+
+/* Table */
+.table {
+     --bs-table-bg: transparent !important;
+     --bs-table-color: var(--text-color);
+     --bs-table-border-color: var(--border-color);
+}
+
+.btn-icon {
+     width: 32px;
+     height: 32px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     padding: 0;
+     border: none;
+     transition: all 0.2s;
+}
+
+
+
+
+[data-theme="dark"] .modern-table tbody tr:hover td {
+     background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+
+[data-theme="dark"] .bg-light-success {
+     background-color: rgba(16, 185, 129, 0.2) !important;
+     color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.2) !important;
+     color: #fcd34d !important;
+}
+
+[data-theme="dark"] .bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.2) !important;
+     color: #fca5a5 !important;
+}

@@ -1,0 +1,144 @@
+.bg-light {
+     background-color: var(--bg-body) !important;
+}
+
+
+.card {
+     background-color: var(--bg-card);
+     transition: all 0.3s ease;
+}
+
+
+
+.card-header {
+     background-color: var(--bg-card) !important;
+     border-color: var(--border-color) !important;
+}
+
+
+.bg-light-success {
+     background-color: rgba(16, 185, 129, 0.1) !important;
+     color: #10b981 !important;
+}
+
+.bg-light-info {
+     background-color: rgba(6, 182, 212, 0.1) !important;
+     color: #06b6d4 !important;
+}
+
+.bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.1) !important;
+     color: #f59e0b !important;
+}
+
+.bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.1) !important;
+     color: #ef4444 !important;
+}
+
+/* Table */
+.table {
+     --bs-table-bg: transparent !important;
+     --bs-table-color: var(--text-color);
+     --bs-table-border-color: var(--border-color);
+}
+
+
+
+.modern-table tbody td {
+     background-color: transparent !important;
+     color: var(--text-color);
+     padding: 12px 16px;
+     border-bottom: 1px solid var(--border-color);
+     vertical-align: middle;
+}
+
+
+
+/* Icons Button */
+.btn-icon {
+     width: 32px;
+     height: 32px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     padding: 0;
+     border: none;
+     transition: all 0.2s;
+}
+
+.btn-light-warning {
+     background-color: rgba(245, 158, 11, 0.1);
+     color: #f59e0b;
+}
+
+.btn-light-warning:hover {
+     background-color: #f59e0b;
+     color: #fff;
+}
+
+.btn-light-danger {
+     background-color: rgba(239, 68, 68, 0.1);
+     color: #ef4444;
+}
+
+.btn-light-danger:hover {
+     background-color: #ef4444;
+     color: #fff;
+}
+
+
+
+
+[data-theme="dark"] .table {
+     color: #e5e7eb !important;
+}
+
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+     border-bottom-color: #374151 !important;
+}
+
+
+[data-theme="dark"] .modern-table tbody tr:hover td {
+     background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .bg-light-secondary {
+     background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+
+
+[data-theme="dark"] .bg-light-success {
+     background-color: rgba(16, 185, 129, 0.2) !important;
+     color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .bg-light-info {
+     background-color: rgba(6, 182, 212, 0.2) !important;
+     color: #67e8f9 !important;
+}
+
+[data-theme="dark"] .bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.2) !important;
+     color: #fcd34d !important;
+}
+
+[data-theme="dark"] .bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.2) !important;
+     color: #fca5a5 !important;
+}
+
+
+
+[data-theme="dark"] .modal-content .btn-light {
+     background-color: transparent;
+     border: 1px solid #374151;
+     color: #9ca3af;
+}
+
+[data-theme="dark"] .modal-content .btn-light:hover {
+     background-color: rgba(255, 255, 255, 0.05);
+     color: #f3f4f6;
+}

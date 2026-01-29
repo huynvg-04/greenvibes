@@ -1,0 +1,115 @@
+.bg-light {
+     background-color: var(--bg-body) !important;
+}
+
+.card {
+     background-color: var(--bg-card);
+     transition: background-color 0.3s;
+}
+
+
+
+.bg-light-success {
+     background-color: rgba(16, 185, 129, 0.1) !important;
+     color: #10b981 !important;
+}
+
+.bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.1) !important;
+     color: #ef4444 !important;
+}
+
+.bg-light-info {
+     background-color: rgba(59, 130, 246, 0.1) !important;
+     color: #3b82f6 !important;
+}
+
+.bg-light-secondary {
+     background-color: rgba(107, 114, 128, 0.1) !important;
+     color: #6b7280 !important;
+}
+
+.bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.1) !important;
+     color: #f59e0b !important;
+}
+
+.badge-self {
+     background-color: #f3f4f6;
+     color: #6b7280;
+     border-color: #e5e7eb;
+}
+
+.btn-icon {
+     width: 32px;
+     height: 32px;
+     padding: 0;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     border-radius: 8px;
+     border: none;
+     transition: all 0.2s;
+}
+
+
+
+.btn-light-warning {
+     background-color: rgba(245, 158, 11, 0.1);
+     color: #f59e0b;
+}
+
+.btn-light-warning:hover {
+     background-color: #f59e0b;
+     color: #fff;
+     transform: translateY(-2px);
+}
+
+.btn-light-danger {
+     background-color: rgba(239, 68, 68, 0.1);
+     color: #ef4444;
+}
+
+.btn-light-danger:hover {
+     background-color: #ef4444;
+     color: #fff;
+     transform: translateY(-2px);
+}
+
+
+[data-theme="dark"] .text-muted {
+     color: #9ca3af !important;
+}
+
+[data-theme="dark"] .fw-bold {
+     color: #fff !important;
+}
+
+
+/* 6. Badges trong Dark Mode */
+[data-theme="dark"] .bg-light-success {
+     background-color: rgba(16, 185, 129, 0.2) !important;
+     color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .bg-light-danger {
+     background-color: rgba(239, 68, 68, 0.2) !important;
+     color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .bg-light-info {
+     background-color: rgba(59, 130, 246, 0.2) !important;
+     color: #93c5fd !important;
+}
+
+[data-theme="dark"] .bg-light-secondary {
+     background-color: rgba(107, 114, 128, 0.2) !important;
+     color: #d1d5db !important;
+}
+
+[data-theme="dark"] .badge-self {
+     background-color: rgba(255, 255, 255, 0.1);
+     color: #d1d5db;
+     border-color: #4b5563;
+}
+

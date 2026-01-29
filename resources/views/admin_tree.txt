@@ -1,0 +1,74 @@
+resources/views/admin
+├── dashboard.blade.php
+├── revenue
+│   └── index.blade.php
+├── reviews
+│   └── index.blade.php
+├── attributes
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── index.blade.php
+├── banners
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── index.blade.php
+├── blogs
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   ├── index.blade.php
+│   └── show.blade.php
+├── categories
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── index.blade.php
+├── coupons
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── index.blade.php
+├── customers
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   ├── index.blade.php
+│   └── show.blade.php
+├── membership-tiers
+│   ├── _form.blade.php
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── index.blade.php
+├── orders
+│   ├── index.blade.php
+│   └── show.blade.php
+├── product_images
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   ├── index.blade.php
+│   └── show.blade.php
+├── product_variants
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   └── index.blade.php
+├── products
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   ├── index.blade.php
+│   └── show.blade.php
+├── returns
+│   ├── index.blade.php
+│   └── show.blade.php
+├── settings
+│   ├── payment
+│   │   ├── create.blade.php
+│   │   ├── edit.blade.php
+│   │   └── index.blade.php
+│   └── shipping
+│       ├── create.blade.php
+│       ├── edit.blade.php
+│       └── index.blade.php
+├── staffs
+│   ├── create.blade.php
+│   ├── edit.blade.php
+│   ├── index.blade.php
+│   └── show.blade.php
+└── warehouse
+    ├── create.blade.php
+    └── index.blade.php

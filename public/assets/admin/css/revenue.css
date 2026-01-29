@@ -1,0 +1,178 @@
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+     background: var(--primary-color) !important;
+     border-color: var(--primary-color) !important;
+}
+
+.flatpickr-day.inRange {
+     box-shadow: -5px 0 0 #e6fffa, 5px 0 0 #e6fffa;
+     background: #e6fffa !important;
+     border-color: #e6fffa !important;
+     color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar {
+     background: var(--bg-card) !important;
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+     border: 1px solid #374151;
+}
+
+[data-theme="dark"] .flatpickr-day {
+     color: #e5e7eb;
+}
+
+[data-theme="dark"] .flatpickr-month,
+[data-theme="dark"] .flatpickr-weekdays {
+     background: var(--bg-card);
+     color: #fff;
+}
+
+[data-theme="dark"] .flatpickr-day.inRange {
+     background: rgba(13, 159, 110, 0.2) !important;
+     border-color: transparent !important;
+     box-shadow: -5px 0 0 rgba(13, 159, 110, 0.2), 5px 0 0 rgba(13, 159, 110, 0.2);
+     color: #6ee7b7 !important;
+}
+
+.transition-all {
+     transition: all 0.3s ease;
+}
+
+#chartTypeToggle button {
+     border: none;
+     outline: none;
+}
+
+#chartTypeToggle button:hover:not(.active) {
+     background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme="dark"] #chartTypeToggle button:not(.active) {
+     color: #9ca3af !important;
+}
+
+.hover-text-primary:hover {
+     color: var(--primary-color) !important;
+}
+
+.transition-all {
+     transition: all 0.2s ease-in-out;
+}
+
+/* Tùy chỉnh input date để trông gọn hơn */
+input[type="date"]::-webkit-calendar-picker-indicator {
+     cursor: pointer;
+     opacity: 0.6;
+     filter: invert(0.5);
+     /* Chỉnh màu icon lịch mặc định của trình duyệt */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+     opacity: 1;
+}
+
+
+
+[data-theme="dark"] input[type="date"] {
+     color: #e5e7eb !important;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+     filter: invert(1);
+}
+
+/* 1. Global & Card */
+.bg-light {
+     background-color: var(--bg-body) !important;
+}
+
+.card {
+     background-color: var(--bg-card);
+     transition: all 0.3s;
+}
+
+.card-hover:hover {
+     transform: translateY(-5px);
+     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+
+.last-mb-0:last-child {
+     margin-bottom: 0 !important;
+}
+
+
+.bg-light-success {
+     background-color: rgba(16, 185, 129, 0.1) !important;
+     color: #10b981 !important;
+}
+
+.bg-light-warning {
+     background-color: rgba(245, 158, 11, 0.1) !important;
+     color: #f59e0b !important;
+}
+
+.bg-light-info {
+     background-color: rgba(59, 130, 246, 0.1) !important;
+     color: #3b82f6 !important;
+}
+
+.bg-light-secondary {
+     background-color: rgba(107, 114, 128, 0.1) !important;
+     color: #6b7280 !important;
+}
+
+
+/* 4. Dark Mode Support */
+[data-theme="dark"] .card-header {
+     background-color: var(--bg-card) !important;
+}
+
+
+[data-theme="dark"] .card-header {
+     border-bottom-color: #374151 !important;
+}
+
+[data-theme="dark"] .text-muted {
+     color: #9ca3af !important;
+}
+
+
+
+
+[data-theme="dark"] .card-header.bg-white {
+     background-color: var(--bg-card) !important;
+     border-bottom-color: #374151 !important;
+}
+
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+     background-color: transparent !important;
+     border-bottom-color: #374151 !important;
+     color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] .table thead.bg-light th {
+     background-color: #111827 !important;
+     color: #9ca3af !important;
+}
+
+[data-theme="dark"] .badge.text-dark {
+     color: #f3f4f6 !important;
+}
