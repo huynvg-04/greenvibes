@@ -185,12 +185,11 @@ class PaymentController extends Controller
         $amount = (string) round($order->total_amount);
         $orderIdMomo = $order->code . "_" . time(); // Thêm time() để đảm bảo orderId gửi lên MoMo là duy nhất
         $redirectUrl = route('payment.momo.return');
-        $ipnUrl = route('payment.momo.return'); // Dùng redirectUrl làm IPN luôn cho môi trường test
+        $ipnUrl = route('payment.momo.return');
         $extraData = "";
         $requestId = time() . "";
         $requestType = "captureWallet"; // Thanh toán qua ứng dụng (quét QR)
 
-        // Tạo chữ ký (Signature) - TUYỆT ĐỐI KHÔNG SỬA THỨ TỰ CÁC BIẾN NÀY
         $rawHash = "accessKey=" . $accessKey .
             "&amount=" . $amount .
             "&extraData=" . $extraData .
