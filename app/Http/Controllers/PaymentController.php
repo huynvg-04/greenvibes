@@ -14,7 +14,7 @@ class PaymentController extends Controller
     /**
      * Create a payment request to VNPay
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @param  int  $orderId
      * @return \Illuminate\Http\Response
      */
@@ -94,7 +94,6 @@ class PaymentController extends Controller
         $vnp_SecureHash = $inputData['vnp_SecureHash'] ?? '';
 
         if (empty($vnp_SecureHash)) {
-            // Sửa route redirect về đúng trang user
             return redirect()->route('user.cart.index')->with('error', 'Thiếu chữ ký xác thực!');
         }
 
@@ -167,5 +166,143 @@ class PaymentController extends Controller
 
             return redirect()->route('user.cart.index')->with('error', 'Sai chữ ký hash!');
         }
+    }
+
+     public function createMomoPayment($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        if ($order->total_amount <= 0) {
+            return redirect()->back()->with('error', 'Số tiền đơn hàng không hợp lệ');
+        }
+
+        $endpoint = env('MOMO_ENDPOINT');
+        $partnerCode = env('MOMO_PARTNER_CODE');
+        $accessKey = env('MOMO_ACCESS_KEY');
+        $secretKey = env('MOMO_SECRET_KEY');
+
+        $orderInfo = "Thanh toan don hang #" . $order->code;
+        $amount = (string) round($order->total_amount);
+        $orderIdMomo = $order->code . "_" . time(); // Thêm time() để đảm bảo orderId gửi lên MoMo là duy nhất
+        $redirectUrl = route('payment.momo.return');
+        $ipnUrl = route('payment.momo.return');
+        $extraData = "";
+        $requestId = time() . "";
+        $requestType = "captureWallet"; // Thanh toán qua ứng dụng (quét QR)
+
+        $rawHash = "accessKey=" . $accessKey .
+            "&amount=" . $amount .
+            "&extraData=" . $extraData .
+            "&ipnUrl=" . $ipnUrl .
+            "&orderId=" . $orderIdMomo .
+            "&orderInfo=" . $orderInfo .
+            "&partnerCode=" . $partnerCode .
+            "&redirectUrl=" . $redirectUrl .
+            "&requestId=" . $requestId .
+            "&requestType=" . $requestType;
+
+        $signature = hash_hmac("sha256", $rawHash, $secretKey);
+
+        $data = [
+            'partnerCode' => $partnerCode,
+            'partnerName' => "Test Store",
+            'storeId' => "MomoTestStore",
+            'requestId' => $requestId,
+            'amount' => $amount,
+            'orderId' => $orderIdMomo,
+            'orderInfo' => $orderInfo,
+            'redirectUrl' => $redirectUrl,
+            'ipnUrl' => $ipnUrl,
+            'lang' => 'vi',
+            'extraData' => $extraData,
+            'requestType' => $requestType,
+            'signature' => $signature
+        ];
+
+        try {
+            $response = Http::post($endpoint, $data);
+            $json = $response->json();
+
+            if (isset($json['resultCode']) && $json['resultCode'] == 0) {
+                // Chuyển hướng người dùng sang trang thanh toán của MoMo
+                return redirect($json['payUrl']);
+            } else {
+                Log::error('Momo Create Error: ' . json_encode($json));
+                return redirect()->route('user.cart.index')->with('error', 'Lỗi tạo thanh toán MoMo: ' . ($json['message'] ?? 'Unknown error'));
+            }
+        } catch (\Exception $e) {
+            Log::error('Momo Exception: ' . $e->getMessage());
+            return redirect()->route('user.cart.index')->with('error', 'Lỗi kết nối đến cổng MoMo');
+        }
+    }
+
+    
+    public function momoReturn(Request $request)
+    {
+        $partnerCode = env('MOMO_PARTNER_CODE');
+        $accessKey = env('MOMO_ACCESS_KEY');
+        $secretKey = env('MOMO_SECRET_KEY');
+
+        $orderId = $request->orderId;
+        $requestId = $request->requestId;
+        $amount = $request->amount;
+        $orderInfo = $request->orderInfo;
+        $orderType = $request->orderType;
+        $transId = $request->transId;
+        $resultCode = $request->resultCode;
+        $message = $request->message;
+        $payType = $request->payType;
+        $responseTime = $request->responseTime;
+        $extraData = $request->extraData;
+        $momoSignature = $request->signature;
+
+        // Tính toán lại chữ ký để đối chiếu
+        $rawHash = "accessKey=" . $accessKey .
+            "&amount=" . $amount .
+            "&extraData=" . $extraData .
+            "&message=" . $message .
+            "&orderId=" . $orderId .
+            "&orderInfo=" . $orderInfo .
+            "&orderType=" . $orderType .
+            "&partnerCode=" . $partnerCode .
+            "&payType=" . $payType .
+            "&requestId=" . $requestId .
+            "&responseTime=" . $responseTime .
+            "&resultCode=" . $resultCode .
+            "&transId=" . $transId;
+
+        $partnerSignature = hash_hmac("sha256", $rawHash, $secretKey);
+
+        // Kiểm tra chữ ký bảo mật
+        if ($momoSignature == $partnerSignature) {
+            if ($resultCode == '0') {
+                // Tách lấy Order Code gốc (Vì lúc gửi đi ta nối thêm _time())
+                $parts = explode('_', $orderId);
+                $originalCode = $parts[0];
+
+                $order = Order::where('code', $originalCode)->first();
+
+                if ($order) {
+                    if ($order->status !== 'completed' && $order->status !== 'confirmed') {
+                        $order->status = 'confirmed';
+                        $order->save();
+
+                        // Gửi email xác nhận
+                        try {
+                            if ($order->user && !empty($order->user->email)) {
+                                Mail::to($order->user->email)->send(new InvoiceMail($order));
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('Lỗi gửi mail hóa đơn MoMo: ' . $e->getMessage());
+                        }
+                    }
+                    return redirect()->route('user.checkout.success', $order->code)->with('success', 'Thanh toán MoMo thành công!');
+                }
+            } else {
+                return redirect()->route('user.cart.index')->with('error', 'Thanh toán thất bại hoặc đã bị hủy: ' . $message);
+            }
+        }
+
+        return redirect()->route('user.cart.index')->with('error', 'Chữ ký MoMo không hợp lệ!');
     }
 }
