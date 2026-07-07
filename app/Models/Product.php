@@ -33,7 +33,7 @@ class Product extends Model
             $primaryImage = $this->images->first();
         }
         if ($primaryImage) {
-            $path = $primaryImage->image_url; 
+            $path = $primaryImage->image_url;
 
             if (str_starts_with($path, 'http')) {
                 return $path;
@@ -47,14 +47,14 @@ class Product extends Model
     protected static function booted()
     {
         static::updated(function ($product) {
-  
+
             if ($product->isDirty('discount_percent')) {
 
                 $variants = $product->variants;
 
                 foreach ($variants as $variant) {
                     $percent = $product->discount_percent;
-                    
+
                     if ($percent > 0 && $variant->list_price > 0) {
                         $discounted = $variant->list_price * ((100 - $percent) / 100);
                         $variant->sale_price = ceil($discounted / 1000) * 1000;
@@ -62,20 +62,13 @@ class Product extends Model
                         $variant->sale_price = $variant->list_price;
                     }
 
-                    $variant->saveQuietly(); 
+                    $variant->saveQuietly();
                 }
             }
         });
-
-        static::addGlobalScope('completed_sum', function ($builder) {
-            $builder->withSum(
-                ['completedOrderItems as completed_order_items_sum_quantity'],
-                'quantity'
-            );
-        });
     }
 
-    protected $guarded = [];
+
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
@@ -107,11 +100,11 @@ class Product extends Model
         return $this->morphToMany(Coupon::class, 'couponable');
     }
 
-    public function orderItems()
+
+    public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
-
     public function reviews()
     {
         return $this->hasManyThrough(
@@ -124,14 +117,12 @@ class Product extends Model
         );
     }
 
-    public function items()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
+
 
     public function getRouteKeyName()
     {
-        if (request()->is('admin/*')) {
+        $request = request();
+        if ($request && $request->is('admin/*')) {
             return 'id';
         }
         return 'slug';
