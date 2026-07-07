@@ -66,10 +66,10 @@ class OrderController extends Controller
         }
 
         if ($request->filled('price_min')) {
-            $query->where('total_amount', '>=', (float)$request->price_min);
+            $query->where('total_amount', '>=', (float) $request->price_min);
         }
         if ($request->filled('price_max')) {
-            $query->where('total_amount', '<=', (float)$request->price_max);
+            $query->where('total_amount', '<=', (float) $request->price_max);
         }
 
         $orders = $query->latest()->paginate(10)->appends($request->query());
@@ -132,17 +132,18 @@ class OrderController extends Controller
                         $item->product->increment('quantity', $item->quantity);
                     }
                 }
+                if ($item->product) {
+                    $item->product->decrement('sold_count', $item->quantity);
+                }
+
+                if ($item->product_variant_id) {
+                    DB::table('product_variants')
+                        ->where('id', $item->product_variant_id)
+                        ->decrement('sold_count', $item->quantity);
+                }
             }
 
-            if ($item->product) {
-                $item->product->decrement('sold_count', $item->quantity);
-            }
 
-            if ($item->product_variant_id) {
-                DB::table('product_variants')
-                    ->where('id', $item->product_variant_id)
-                    ->decrement('sold_count', $item->quantity);
-            }
 
             DB::commit();
             return back()->with('success', 'Hủy đơn hàng thành công.');
@@ -171,7 +172,8 @@ class OrderController extends Controller
 
     public function returnForm(Order $order)
     {
-        if ($order->user_id !== Auth::id()) abort(403);
+        if ($order->user_id !== Auth::id())
+            abort(403);
 
         if ($order->status !== 'completed') {
             return back()->with('error', 'Đơn hàng chưa hoàn thành, không thể yêu cầu hoàn hàng.');
@@ -190,7 +192,8 @@ class OrderController extends Controller
     public function storeReturn(Request $request, Order $order)
     {
 
-        if ($order->user_id !== Auth::id()) abort(403);
+        if ($order->user_id !== Auth::id())
+            abort(403);
 
         $request->validate([
             'reason' => 'required|string|max:255',
@@ -237,7 +240,7 @@ class OrderController extends Controller
             $quantities = $request->input('quantities', []);
 
             foreach ($request->items as $itemId => $val) {
-                $qtyToReturn = isset($quantities[$itemId]) ? (int)$quantities[$itemId] : 1;
+                $qtyToReturn = isset($quantities[$itemId]) ? (int) $quantities[$itemId] : 1;
 
                 if ($qtyToReturn > 0) {
                     $orderItem = $order->items->find($itemId);
