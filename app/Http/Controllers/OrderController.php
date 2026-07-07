@@ -143,8 +143,6 @@ class OrderController extends Controller
                 }
             }
 
-
-
             DB::commit();
             return back()->with('success', 'Hủy đơn hàng thành công.');
         } catch (\Exception $e) {
@@ -226,7 +224,7 @@ class OrderController extends Controller
                 }
             }
 
-            $orderReturn = \App\Models\OrderReturn::create([
+            $orderReturn = OrderReturn::create([
                 'order_id' => $order->id,
                 'user_id' => Auth::id(),
                 'reason' => $request->reason,
@@ -248,7 +246,7 @@ class OrderController extends Controller
                         $qtyToReturn = $orderItem->quantity;
                     }
 
-                    \App\Models\OrderReturnItem::create([
+                    OrderReturnItem::create([
                         'order_return_id' => $orderReturn->id,
                         'order_item_id' => $itemId,
                         'quantity' => $qtyToReturn
