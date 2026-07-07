@@ -26,33 +26,33 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Số tiền đơn hàng không hợp lệ');
         }
 
-        $vnp_TmnCode    = config('vnpay.vnp_tmncode');
+        $vnp_TmnCode = config('vnpay.vnp_tmncode');
         $vnp_HashSecret = config('vnpay.vnp_hashsecret');
-        $vnp_Url        = config('vnpay.vnp_url');
-        $vnp_Returnurl  = config('vnpay.vnp_returnurl');
+        $vnp_Url = config('vnpay.vnp_url');
+        $vnp_Returnurl = config('vnpay.vnp_returnurl');
 
-        $vnp_TxnRef     = $order->code; 
-        $vnp_OrderInfo  = "Thanh toan don hang #" . $order->code;
-        $vnp_OrderType  = 'billpayment';
+        $vnp_TxnRef = $order->code;
+        $vnp_OrderInfo = "Thanh toan don hang #" . $order->code;
+        $vnp_OrderType = 'billpayment';
 
-        $vnp_Amount     = (int)(round($order->total_amount * 100));
-        
-        $vnp_Locale     = 'vn';
-        $vnp_IpAddr     = $request->ip();
+        $vnp_Amount = (int) (round($order->total_amount * 100));
+
+        $vnp_Locale = 'vn';
+        $vnp_IpAddr = $request->ip();
 
         $inputData = [
-            "vnp_Version"    => "2.1.0",
-            "vnp_TmnCode"    => $vnp_TmnCode,
-            "vnp_Amount"     => $vnp_Amount,
-            "vnp_Command"    => "pay",
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
             "vnp_CreateDate" => date('YmdHis'),
-            "vnp_CurrCode"   => "VND",
-            "vnp_IpAddr"     => $vnp_IpAddr,
-            "vnp_Locale"     => $vnp_Locale,
-            "vnp_OrderInfo"  => $vnp_OrderInfo,
-            "vnp_OrderType"  => $vnp_OrderType,
-            "vnp_ReturnUrl"  => $vnp_Returnurl,
-            "vnp_TxnRef"     => $vnp_TxnRef
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef
         ];
 
         $inputData = array_filter($inputData, function ($value) {
@@ -128,7 +128,7 @@ class PaymentController extends Controller
         if ($secureHash === $vnp_SecureHash) {
             if ($request->vnp_ResponseCode == '00') {
                 $order = \App\Models\Order::where('code', $request->vnp_TxnRef)->first();
-                
+
                 if (!$order) {
                     return redirect()->route('user.cart.index')->with('error', 'Không tìm thấy đơn hàng!');
                 }
@@ -168,7 +168,7 @@ class PaymentController extends Controller
         }
     }
 
-     public function createMomoPayment($orderId)
+    public function createMomoPayment($orderId)
     {
         $order = Order::findOrFail($orderId);
 
@@ -176,10 +176,10 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Số tiền đơn hàng không hợp lệ');
         }
 
-        $endpoint = env('MOMO_ENDPOINT');
-        $partnerCode = env('MOMO_PARTNER_CODE');
-        $accessKey = env('MOMO_ACCESS_KEY');
-        $secretKey = env('MOMO_SECRET_KEY');
+        $endpoint = config('momo.endpoint');
+        $partnerCode = config('momo.partner_code');
+        $accessKey = config('momo.access_key');
+        $secretKey = config('momo.secret_key');
 
         $orderInfo = "Thanh toan don hang #" . $order->code;
         $amount = (string) round($order->total_amount);
@@ -236,12 +236,12 @@ class PaymentController extends Controller
         }
     }
 
-    
+
     public function momoReturn(Request $request)
     {
-        $partnerCode = env('MOMO_PARTNER_CODE');
-        $accessKey = env('MOMO_ACCESS_KEY');
-        $secretKey = env('MOMO_SECRET_KEY');
+        $partnerCode = config('momo.partner_code');
+        $accessKey = config('momo.access_key');
+        $secretKey = config('momo.secret_key');
 
         $orderId = $request->orderId;
         $requestId = $request->requestId;
@@ -274,34 +274,41 @@ class PaymentController extends Controller
         $partnerSignature = hash_hmac("sha256", $rawHash, $secretKey);
 
         // Kiểm tra chữ ký bảo mật
-        if ($momoSignature == $partnerSignature) {
+        if (hash_equals($partnerSignature, (string) $momoSignature)) {
             if ($resultCode == '0') {
-                // Tách lấy Order Code gốc (Vì lúc gửi đi ta nối thêm _time())
+                // Tách lấy order code gốc
                 $parts = explode('_', $orderId);
                 $originalCode = $parts[0];
 
                 $order = Order::where('code', $originalCode)->first();
 
-                if ($order) {
-                    if ($order->status !== 'completed' && $order->status !== 'confirmed') {
-                        $order->status = 'confirmed';
-                        $order->save();
-
-                        // Gửi email xác nhận
-                        try {
-                            if ($order->user && !empty($order->user->email)) {
-                                Mail::to($order->user->email)->send(new InvoiceMail($order));
-                            }
-                        } catch (\Exception $e) {
-                            Log::error('Lỗi gửi mail hóa đơn MoMo: ' . $e->getMessage());
-                        }
-                    }
-                    return redirect()->route('user.checkout.success', $order->code)->with('success', 'Thanh toán MoMo thành công!');
+                if (!$order) {
+                    return redirect()->route('user.cart.index')->with('error', 'Không tìm thấy đơn hàng');
                 }
+                if ($order->status !== 'completed' && $order->status !== 'confirmed') {
+                    $order->status = 'confirmed';
+                    $order->save();
+
+                    // Gửi email xác nhận
+                    try {
+                        if ($order->user && !empty($order->user->email)) {
+                            Mail::to($order->user->email)->send(new InvoiceMail($order));
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Lỗi gửi mail hóa đơn MoMo: ' . $e->getMessage());
+                    }
+                }
+                return redirect()->route('user.checkout.success', $order->code)->with('success', 'Thanh toán MoMo thành công!');
+
             } else {
                 return redirect()->route('user.cart.index')->with('error', 'Thanh toán thất bại hoặc đã bị hủy: ' . $message);
             }
         }
+
+        Log::error('Momo Signature Mismatch', [
+            'orderId' => $orderId,
+            'received' => $momoSignature,
+        ]);
 
         return redirect()->route('user.cart.index')->with('error', 'Chữ ký MoMo không hợp lệ!');
     }
