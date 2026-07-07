@@ -27,8 +27,6 @@ use App\Services\InventoryService;
 class CheckoutController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
      * @return \Illuminate\Http\Response
      */
     /**
@@ -99,7 +97,8 @@ class CheckoutController extends Controller
 
         $subtotal = $cartItems->sum(function ($item) {
             $price = $item->variant ? $item->variant->list_price : $item->product->price;
-            if ($item->product->promotion_price) $price = $item->product->promotion_price;
+            if ($item->product->promotion_price)
+                $price = $item->product->promotion_price;
             return $price * $item->quantity;
         });
 
@@ -183,34 +182,29 @@ class CheckoutController extends Controller
         if ($couponCode) {
             $coupon = Coupon::where('code', $couponCode)->where('is_active', true)->first();
 
-            if ($coupon) {
-                // 1. Ép kiểu số để so sánh chính xác
-                $minOrder = (float)$coupon->min_order_value;
+            if ($coupon && $coupon->isValid()) {
+                $minOrder = (float) $coupon->min_order_value;
 
-                // 2. Kiểm tra điều kiện
-                // Tạm thời bỏ qua isValid() để test xem có phải lỗi do nó không
-                // Nếu muốn dùng isValid(), hãy chắc chắn nó không chặn sai
                 if ($subtotal < $minOrder) {
-                    // Hủy nếu không đủ tiền
                     $coupon = null;
                 } else {
-                    // 3. Tính toán (Ép kiểu float cho value)
-                    $val = (float)$coupon->value;
-                    $type = strtolower($coupon->type); // fixed / percent
+                    $val = (float) $coupon->value;
+                    $type = strtolower($coupon->type);
 
                     if ($type == 'fixed') {
                         $couponDiscount = $val;
                     } elseif ($type == 'percent') {
                         $calc = $subtotal * ($val / 100);
-                        $maxDiscount = (float)$coupon->max_discount_value;
+                        $maxDiscount = (float) $coupon->max_discount_value;
 
-                        if ($maxDiscount > 0) {
-                            $couponDiscount = min($calc, $maxDiscount);
-                        } else {
-                            $couponDiscount = $calc;
-                        }
+
+                        $couponDiscount = ($maxDiscount > 0)
+                            ? min($calc, $maxDiscount)
+                            : $calc;
                     }
                 }
+            } else {
+                $coupon = null;
             }
         }
 
@@ -281,10 +275,15 @@ class CheckoutController extends Controller
         ]);
 
         if ($request->filled('applied_coupon')) {
-            $codeFromInput = $request->input('applied_coupon');
+            // validate coupon
+            $codeFromInput = trim($request->input('applied_coupon'));
 
-            session()->put('coupon_code', $codeFromInput);
-            session()->save(); 
+            $inputCoupon = Coupon::where('code', $codeFromInput)->where('is_active', true)->first();
+
+            if ($inputCoupon && $inputCoupon->isValid()) {
+                session()->put('coupon_code', $codeFromInput);
+                session()->save();
+            }
         }
 
         $user = Auth::user();
@@ -293,7 +292,8 @@ class CheckoutController extends Controller
             ->with(['product', 'variant'])
             ->get();
 
-        if ($cartItems->isEmpty()) return redirect()->route('user.cart.index');
+        if ($cartItems->isEmpty())
+            return redirect()->route('user.cart.index');
 
 
         // $debugCalcs = $this->calculateOrderTotal($cartItems);
@@ -357,18 +357,19 @@ class CheckoutController extends Controller
                     $stock = $lockedVariant->stock ?? $lockedVariant->quantity ?? 0;
 
                     if (!$lockedVariant || $stock < $item->quantity) {
-                        throw new \Exception("Sản phẩm " . $item->product->name . " (Biến thể) vừa hết hàng.");
+                        throw new \Exception("Sản phẩm " . $item->product->name . " (Phân loại) vừa hết hàng.");
                     }
                 } else {
                     $lockedProduct = \App\Models\Product::where('id', $item->product_id)
                         ->lockForUpdate()->first();
                     if (!$lockedProduct || $lockedProduct->quantity < $item->quantity) {
-                        throw new \Exception("Sản phẩm " . $lockedProduct->name . " vừa hết hàng.");
+                        throw new \Exception("Sản phẩm " . ($lockedProduct?->name ?? "không xác định") . " vừa hết hàng.");
                     }
                 }
 
                 $price = $item->variant ? $item->variant->list_price : $item->product->price;
-                if ($item->product->promotion_price) $price = $item->product->promotion_price;
+                if ($item->product->promotion_price)
+                    $price = $item->product->promotion_price;
 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -378,13 +379,15 @@ class CheckoutController extends Controller
                     'price' => $price,
                 ]);
 
-                if ($item->product) $item->product->increment('sold_count', $item->quantity);
-                if ($item->product_variant_id && $item->variant) $item->variant->increment('sold_count', $item->quantity);
+                if ($item->product)
+                    $item->product->increment('sold_count', $item->quantity);
+                if ($item->product_variant_id && $item->variant)
+                    $item->variant->increment('sold_count', $item->quantity);
 
                 if ($item->product_variant_id) {
                     InventoryService::log($item->product_variant_id, $item->quantity, 'out', "Đơn hàng #{$order->code}", $order);
                 } else {
-                    $item->product->decrement('quantity', $item->quantity);
+                    $lockedProduct->decrement('quantity', $item->quantity);
                 }
             }
 
@@ -402,7 +405,7 @@ class CheckoutController extends Controller
                     Notification::send($admins, new NewOrderNotification($order));
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Lỗi thông báo: ' . $e->getMessage());
+                Log::error('Lỗi thông báo: ' . $e->getMessage());
             }
 
             // Xử lý thanh toán và Redirect
