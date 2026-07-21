@@ -7,11 +7,9 @@ use App\Models\OrderItem;
 use App\Models\Review;
 use App\Models\ReviewLike;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-// Import thư viện ảnh
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Intervention\Image\Laravel\Facades\Image;
+use App\Services\ImageUploadService;
 
 class ReviewController extends Controller
 {
@@ -54,28 +52,16 @@ class ReviewController extends Controller
        try {
             $imagePaths = [];
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $file) {
-                    $filename = 'review_' . time() . '_' . uniqid() . '.jpg';
-                    $path = 'reviews/' . $filename;
-
-                    try {
-
-                        $image = Image::read($file);
-
-                        $image->scale(width: 800); 
-
-                        $encoded = $image->toJpeg(quality: 80);
-
-                        Storage::disk('public')->put($path, (string) $encoded);
-                        
-                        $imagePaths[] = $path;
-
-                    } catch (\Exception $imgError) {
-                        Log::error("Lỗi xử lý ảnh Intervention: " . $imgError->getMessage());
-
-                        $imagePaths[] = $file->store('reviews', 'public');
-                    }
-                }
+                /** @var ImageUploadService $imageService */
+                $imageService = app(ImageUploadService::class);
+                $imagePaths = $imageService->uploadMultiple(
+                    $request->file('images'),
+                    'reviews',
+                    800,
+                    80,
+                    'jpeg',
+                    'review_'
+                );
             }
 
             $review = Review::create([

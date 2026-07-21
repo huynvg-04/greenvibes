@@ -44,10 +44,11 @@ use App\Http\Controllers\Admin\MembershipTierController;
 
 use App\Http\Controllers\ReviewController;
 
-Route::get('/phpinfo', function () {
-    phpinfo();
-});
 
+
+Route::get('/test', function () {
+    return view('welcome');
+});
 
 Auth::routes(['reset' => false, 'verify' => true, 'register' => false]);  //update
 
@@ -58,7 +59,7 @@ Route::get('/email/verify', function () {
 Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
     $user = User::findOrFail($id);
 
-    if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
         abort(403, 'Link xác thực không hợp lệ');
     }
 
@@ -93,7 +94,7 @@ Route::post('/chatbot/send', [ChatbotController::class, 'chat'])->name('chatbot.
 Route::get('/chatbot/history', [ChatbotController::class, 'history'])->name('chatbot.history');
 Route::get('/', [ProductController::class, 'home'])->name('home');
 
-Route::get('/test-gemini-models', [ChatbotController::class, 'testModels']);
+
 
 Route::get('/dang-nhap', [LoginController::class, 'showCustomerLoginForm'])->name('login');
 Route::post('/dang-nhap', [LoginController::class, 'customerLogin']);
@@ -144,6 +145,8 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/payment/create/{orderId}', [PaymentController::class, 'createPayment'])->name('payment.create');
 
     Route::get('/payment/return', [PaymentController::class, 'paymentReturn'])->name('payment.return');
+    Route::get('/payment/momo/create/{orderId}', [PaymentController::class, 'createMomoPayment'])->name('payment.momo.create');
+    Route::get('/payment/momo/return', [PaymentController::class, 'momoReturn'])->name('payment.momo.return');
     Route::patch('/don-hang/{order}/huy', [OrderController::class, 'cancel'])->name('user.orders.cancel');
     Route::patch('/don-hang/{order}/hoan-thanh', [OrderController::class, 'complete'])->name('user.orders.complete');
     Route::get('/don-hang/{order}/hoan-hang', [OrderController::class, 'returnForm'])->name('user.orders.return');
@@ -159,8 +162,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/don-hang', [OrderController::class, 'index'])->name('user.orders.index');
     Route::get('/don-hang/tao-moi', [OrderController::class, 'create'])->name('user.orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('user.orders.store');
-    Route::get('/payment/{orderId}', [PaymentController::class, 'createPayment'])->name('payment.create');
-    Route::get('/payment-return', [PaymentController::class, 'paymentReturn'])->name('payment.return');
     Route::post('/orders/item/{item}/review', [OrderController::class, 'storeItemReview'])
         ->name('user.orders.item.review');
     Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('user.wishlists.index');
@@ -176,54 +177,54 @@ Route::prefix('admin')->middleware(['auth', 'role:manager|staff', 'prevent-back-
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::resource('coupons', CouponController::class)->names([
-        'index'   => 'admin.coupons.index',
-        'create'  => 'admin.coupons.create',
-        'store'   => 'admin.coupons.store',
-        'edit'    => 'admin.coupons.edit',
-        'update'  => 'admin.coupons.update',
+        'index' => 'admin.coupons.index',
+        'create' => 'admin.coupons.create',
+        'store' => 'admin.coupons.store',
+        'edit' => 'admin.coupons.edit',
+        'update' => 'admin.coupons.update',
         'destroy' => 'admin.coupons.destroy',
     ]);
 
 
     Route::resource('customers', CustomerController::class)->names([
-        'index'   => 'admin.customers.index',
-        'create'  => 'admin.customers.create',
-        'store'   => 'admin.customers.store',
-        'edit'    => 'admin.customers.edit',
-        'update'  => 'admin.customers.update',
+        'index' => 'admin.customers.index',
+        'create' => 'admin.customers.create',
+        'store' => 'admin.customers.store',
+        'edit' => 'admin.customers.edit',
+        'update' => 'admin.customers.update',
         'destroy' => 'admin.customers.destroy',
     ]);
 
 
     Route::resource('categories', CategoryController::class)->names([
-        'index'   => 'admin.categories.index',
-        'create'  => 'admin.categories.create',
-        'store'   => 'admin.categories.store',
-        'show'    => 'admin.categories.show',
-        'edit'    => 'admin.categories.edit',
-        'update'  => 'admin.categories.update',
+        'index' => 'admin.categories.index',
+        'create' => 'admin.categories.create',
+        'store' => 'admin.categories.store',
+        'show' => 'admin.categories.show',
+        'edit' => 'admin.categories.edit',
+        'update' => 'admin.categories.update',
         'destroy' => 'admin.categories.destroy',
     ]);
 
 
     Route::resource('products', AdminProductController::class)->names([
-        'index'   => 'admin.products.index',
-        'create'  => 'admin.products.create',
-        'store'   => 'admin.products.store',
-        'show'    => 'admin.products.show',
-        'edit'    => 'admin.products.edit',
-        'update'  => 'admin.products.update',
+        'index' => 'admin.products.index',
+        'create' => 'admin.products.create',
+        'store' => 'admin.products.store',
+        'show' => 'admin.products.show',
+        'edit' => 'admin.products.edit',
+        'update' => 'admin.products.update',
         'destroy' => 'admin.products.destroy',
     ]);
 
 
     Route::resource('banners', BannerController::class)->names([
-        'index'   => 'admin.banners.index',
-        'create'  => 'admin.banners.create',
-        'store'   => 'admin.banners.store',
-        'show'    => 'admin.banners.show',
-        'edit'    => 'admin.banners.edit',
-        'update'  => 'admin.banners.update',
+        'index' => 'admin.banners.index',
+        'create' => 'admin.banners.create',
+        'store' => 'admin.banners.store',
+        'show' => 'admin.banners.show',
+        'edit' => 'admin.banners.edit',
+        'update' => 'admin.banners.update',
         'destroy' => 'admin.banners.destroy',
     ]);
 
@@ -254,36 +255,25 @@ Route::prefix('admin')->middleware(['auth', 'role:manager|staff', 'prevent-back-
     Route::resource('product_variants', ProductVariantController::class)
         ->except(['create', 'store'])
         ->names([
-            'index'   => 'admin.product_variants.index',
-            'show'    => 'admin.product_variants.show',
-            'edit'    => 'admin.product_variants.edit',
-            'update'  => 'admin.product_variants.update',
+            'index' => 'admin.product_variants.index',
+            'show' => 'admin.product_variants.show',
+            'edit' => 'admin.product_variants.edit',
+            'update' => 'admin.product_variants.update',
             'destroy' => 'admin.product_variants.destroy',
         ]);
 
     Route::resource('attributes', AttributeController::class)->names([
-        'index'   => 'admin.attributes.index',
-        'create'  => 'admin.attributes.create',
-        'store'   => 'admin.attributes.store',
-        'show'    => 'admin.attributes.show',
-        'edit'    => 'admin.attributes.edit',
-        'update'  => 'admin.attributes.update',
+        'index' => 'admin.attributes.index',
+        'create' => 'admin.attributes.create',
+        'store' => 'admin.attributes.store',
+        'show' => 'admin.attributes.show',
+        'edit' => 'admin.attributes.edit',
+        'update' => 'admin.attributes.update',
         'destroy' => 'admin.attributes.destroy',
     ]);
 
     Route::post('attributes/{attribute}/values', [AttributeController::class, 'storeValue'])->name('attributes.values.store');
     Route::delete('attributes/values/{attributeValue}', [AttributeController::class, 'destroyValue'])->name('attributes.values.destroy');
-
-    Route::resource('blogs', AdminBlogController::class)->names([
-        'index'   => 'admin.blogs.index',
-        'create'  => 'admin.blogs.create',
-        'store'   => 'admin.blogs.store',
-        'show'    => 'admin.blogs.show',
-        'edit'    => 'admin.blogs.edit',
-        'update'  => 'admin.blogs.update',
-        'destroy' => 'admin.blogs.destroy',
-    ]);
-
 
     Route::resource('blogs', AdminBlogController::class)->names([
         'index' => 'admin.blogs.index',
@@ -323,6 +313,7 @@ Route::prefix('admin')->middleware(['auth', 'role:manager|staff', 'prevent-back-
 
 
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('admin.orders.export');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
     Route::get('orders/{order}/print', [AdminOrderController::class, 'print'])->name('admin.orders.print');
@@ -331,46 +322,14 @@ Route::prefix('admin')->middleware(['auth', 'role:manager|staff', 'prevent-back-
     Route::delete('/reviews/{review}', [App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 });
 
-// Route::middleware(['auth', 'role:manager'])->prefix('admin')->name('admin.')->group(function () {
-
-//     Route::resource('staffs', StaffController::class);
-// });
-
-
-// Route::prefix('admin')->middleware(['auth', 'role:manager'])->group(function () {
-//     Route::resource('staffs', StaffController::class)->names([
-//         'index' => 'admin.staffs.index',
-//         'create' => 'admin.staffs.create',
-//         'store' => 'admin.staffs.store',
-//         'show' => 'admin.staffs.show',
-//         'edit' => 'admin.staffs.edit',
-//         'update' => 'admin.staffs.update',
-//         'destroy' => 'admin.staffs.destroy',
-//     ]);
-// });
 
 Route::middleware(['auth', 'role:manager'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('staffs', StaffController::class)->except(['show']);
 });
 
-
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-
     Route::get('staffs/{staff}', [StaffController::class, 'show'])->name('staffs.show');
-    // Route::get('staffs/{staff}/edit', [StaffController::class, 'edit'])->name('staffs.edit');
-    // Route::put('staffs/{staff}', [StaffController::class, 'update'])->name('staffs.update');
 });
-
-
-
-
-Route::get('/check-php', function () {
-    return [
-        'upload_max_filesize' => ini_get('upload_max_filesize'),
-        'post_max_size' => ini_get('post_max_size'),
-    ];
-});
-
 
 
 Route::fallback(function () {
@@ -379,19 +338,23 @@ Route::fallback(function () {
 
     $user = Auth::user();
 
-    if ($user) {
-        $isInternalUser = false;
+    // if ($user) {
+    //     $isInternalUser = false;
 
-        if (isset($user->role) && in_array($user->role, ['manager', 'staff'])) {
-            $isInternalUser = true;
-        } elseif (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['manager', 'staff'])) {
-            $isInternalUser = true;
-        }
+    //     if (isset($user->role) && in_array($user->role, ['manager', 'staff'])) {
+    //         $isInternalUser = true;
+    //     } elseif (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['manager', 'staff'])) {
+    //         $isInternalUser = true;
+    //     }
 
-        if ($isInternalUser) {
-            $homeUrl = route('admin.dashboard');
-            $btnText = 'Về Dashboard';
-        }
+    //     if ($isInternalUser) {
+    //         $homeUrl = route('admin.dashboard');
+    //         $btnText = 'Về Dashboard';
+    //     }
+    // }
+    if ($user && $user->hasAnyRole(['manager', 'staff'])) {
+        $homeUrl = route('admin.dashboard');
+        $btnText = 'Về Dashboard';
     }
 
     return response()->view('errors.404', [

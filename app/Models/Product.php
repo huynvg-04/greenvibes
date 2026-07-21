@@ -66,8 +66,14 @@ class Product extends Model
                 }
             }
         });
-    }
 
+        static::addGlobalScope('completed_sum', function ($builder) {
+            $builder->withSum(
+                ['completedOrderItems as completed_order_items_sum_quantity'],
+                'quantity'
+            );
+        });
+    }
 
     public function variants()
     {
@@ -100,11 +106,11 @@ class Product extends Model
         return $this->morphToMany(Coupon::class, 'couponable');
     }
 
-
-    public function items()
+    public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }
+
     public function reviews()
     {
         return $this->hasManyThrough(
@@ -117,7 +123,10 @@ class Product extends Model
         );
     }
 
-
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
     public function getRouteKeyName()
     {

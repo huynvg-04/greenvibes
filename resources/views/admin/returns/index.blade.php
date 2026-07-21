@@ -186,7 +186,7 @@
                         
                         <td>
                             @if($return->order)
-                            <a href="{{ route('admin.orders.show', $return->order->id) }}" class="fw-bold text-body text-decoration-none d-flex align-items-center gap-1">
+                            <a href="{{ route('admin.orders.show', $return->order->code) }}" class="fw-bold text-body text-decoration-none d-flex align-items-center gap-1">
                                 #{{ $return->order->code }}
                             </a>
                             @else
@@ -236,7 +236,7 @@
 
                         <td class="pe-4 text-center">
                             @can('view', $return)
-                            <a href="{{ route('admin.returns.show', $return->id) }}"
+                            <a href="{{ route('admin.returns.show', $return->order->code) }}"
                                 class="btn btn-icon btn-light-primary rounded-circle shadow-sm"
                                 data-bs-toggle="tooltip" title="Xử lý yêu cầu">
                                 <i class='bx bxs-show'></i>

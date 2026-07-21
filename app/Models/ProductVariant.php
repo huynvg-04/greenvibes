@@ -18,7 +18,7 @@ class ProductVariant extends Model
         'sale_price',
         'sold_count'
     ];
-    protected $guarded = [];
+
     protected $touches = ['product'];
 
     public function product()

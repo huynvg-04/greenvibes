@@ -191,7 +191,7 @@
                                 @if($trans->reference_type == 'App\Models\Order')
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="badge bg-light-info text-info border border-0 rounded-1 px-2" style="font-size: 10px;">Đơn hàng</span>
-                                    <a href="{{ route('admin.orders.show', $trans->reference_id) }}" class="text-decoration-none fw-bold small primary-color">
+                                    <a href="{{ route('admin.orders.show', $trans->reference->code ?? $trans->reference_id) }}" class="text-decoration-none fw-bold small primary-color">
                                         #{{ $trans->reference->code ?? $trans->reference_id }}
                                     </a>
                                 </div>
@@ -199,8 +199,8 @@
                                 @elseif($trans->reference_type == 'App\Models\OrderReturn')
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="badge bg-light-danger text-danger border border-0 rounded-1 px-2" style="font-size: 10px;">Hoàn hàng</span>
-                                    <a href="{{ route('admin.returns.show', $trans->reference_id) }}" class="text-decoration-none fw-bold small text-danger">
-                                        Return #{{ $trans->reference->id ?? $trans->reference_id }}
+                                    <a href="{{ route('admin.returns.show', $trans->reference->order->code ?? $trans->reference_id) }}" class="text-decoration-none fw-bold small text-danger">
+                                        Return #{{ $trans->reference->order->code ?? $trans->reference_id }}
                                     </a>
                                 </div>
 

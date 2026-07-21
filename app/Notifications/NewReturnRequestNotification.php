@@ -42,12 +42,12 @@ class NewReturnRequestNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('[Admin] Yêu cầu hoàn hàng mới #' . $this->returnRequest->id)
+            ->subject('[Admin] Yêu cầu hoàn hàng mới #' . $this->returnRequest->order->code)
             ->greeting("Xin chào {$notifiable->name},")
             ->line("Có một yêu cầu hoàn hàng mới từ khách hàng.")
             ->line("Mã đơn hàng: **{$this->returnRequest->order->code}**")
             ->line("Lý do: {$this->returnRequest->reason}")
-            ->action('Xử lý ngay', route('admin.returns.show', $this->returnRequest->id))
+            ->action('Xử lý ngay', route('admin.returns.show', $this->returnRequest->order->code))
             ->line('Vui lòng kiểm tra và xử lý sớm.');
     }
 
@@ -60,13 +60,13 @@ class NewReturnRequestNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'return_id' => $this->returnRequest->id,
+            'return_id' => $this->returnRequest->order->code,
             'title'     => 'Yêu cầu hoàn hàng mới',
             'message'   => "Khách hàng {$this->returnRequest->user->name} yêu cầu hoàn đơn #{$this->returnRequest->order->code}",
             'icon'      => 'bx bx-undo',
             'color'     => 'success',
             'bg_color'  => '#fff3cd',
-            'link'      => route('admin.returns.show', $this->returnRequest->id),
+            'link'      => route('admin.returns.show', $this->returnRequest->order->code),
         ];
     }
 }

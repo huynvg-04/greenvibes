@@ -111,7 +111,8 @@ class ReturnController extends Controller
      */
     public function show(OrderReturn $return)
     {
-        $return->load(['items.orderItem.product', 'order']);
+        $return->load(['items.orderItem.product', 'items.orderItem.variant.attributeValues', 'order', 'user']);
+
 
         $this->authorize('view', $return);
 

@@ -8,11 +8,11 @@ use App\Models\ProductImage;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image;
+use App\Services\ImageUploadService;
 
 class ProductImageController extends Controller
 {
+    public function __construct(protected ImageUploadService $imageService) {}
     /**
      * Display a listing of the resource.
      *
@@ -113,19 +113,7 @@ class ProductImageController extends Controller
 
             foreach ($request->file('images') as $index => $file) {
 
-                $filename = time() . '_' . uniqid() . '_' . $index . '.' . $file->getClientOriginalExtension();
-                $folder = 'product_images';
-                $fullPath = $folder . '/' . $filename;
-                $mimeType = $file->getMimeType();
-
-                if (str_starts_with($mimeType, 'image/') && $mimeType !== 'image/svg+xml') {
-                    $image = Image::read($file);
-                    $image->scale(width: 1000);
-                    $encodedImage = $image->toJpeg(80);
-                    Storage::disk('public')->put($fullPath, $encodedImage);
-                } else {
-                    Storage::disk('public')->putFileAs($folder, $file, $filename);
-                }
+                $fullPath = $this->imageService->upload($file, 'product_images', 1000);
 
                 $isPrimary = false;
 
@@ -196,12 +184,11 @@ class ProductImageController extends Controller
         $this->authorize('update', $productImage);
 
         if ($request->hasFile('image')) {
-            if ($productImage->image_url && Storage::disk('public')->exists($productImage->image_url)) {
-                Storage::disk('public')->delete($productImage->image_url);
-            }
-
-            $path = $request->file('image')->store('product_images', 'public');
-            $productImage->image_url = $path;
+            $productImage->image_url = $this->imageService->replace(
+                $request->file('image'),
+                $productImage->image_url,
+                'product_images'
+            );
         }
 
         if ($request->has('is_primary')) {
@@ -233,9 +220,7 @@ class ProductImageController extends Controller
 
         $isPrimary = $productImage->is_primary;
 
-        if (Storage::disk('public')->exists($productImage->image_url)) {
-            Storage::disk('public')->delete($productImage->image_url);
-        }
+        $this->imageService->delete($productImage->image_url);
 
         $productImage->delete();
 
@@ -275,9 +260,7 @@ class ProductImageController extends Controller
             ->get();
 
         foreach ($images as $image) {
-            if (Storage::disk('public')->exists($image->image_url)) {
-                Storage::disk('public')->delete($image->image_url);
-            }
+            $this->imageService->delete($image->image_url);
             $image->delete();
         }
 
@@ -296,9 +279,7 @@ class ProductImageController extends Controller
         $this->authorize('delete', ProductImage::class);
 
         foreach ($product->images as $image) {
-            if (Storage::disk('public')->exists($image->image_url)) {
-                Storage::disk('public')->delete($image->image_url);
-            }
+            $this->imageService->delete($image->image_url);
             $image->delete();
         }
 

@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule; 
+use App\Services\ImageUploadService;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
+    public function __construct(protected ImageUploadService $imageService)
+    {
+    }
     /**
      * Display a listing of the resource.
      *
@@ -18,7 +21,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Category::class);
-        
+
         $query = Category::query();
 
         if ($request->keyword) {
@@ -29,15 +32,15 @@ class CategoryController extends Controller
             $query->where('type', $request->type);
         }
 
-        
+
         $perPage = $request->input('per_page', 10);
 
         $allowedPerPage = [10, 20, 50, 100];
         if (!in_array($perPage, $allowedPerPage)) {
             $perPage = 10;
         }
-        
-        $categories = $query->paginate($perPage)->appends($request->all()); 
+
+        $categories = $query->paginate($perPage)->appends($request->all());
 
         return view('admin.categories.index', compact('categories'));
     }
@@ -56,7 +59,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -64,10 +67,10 @@ class CategoryController extends Controller
         $this->authorize('create', Category::class);
 
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'slug'  => 'required|string|max:255|unique:categories,slug', 
-            'type'  => 'required|in:product,blog', 
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:categories,slug',
+            'type' => 'required|in:product,blog',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ], [
             'name.unique' => 'Tên danh mục này đã tồn tại, vui lòng chọn tên khác.',
             'name.required' => 'Tên danh mục không được để trống.',
@@ -77,19 +80,18 @@ class CategoryController extends Controller
             'slug.string' => 'Tên đường dẫn không hợp lệ.',
             'slug.max' => 'Slug không được quá 255 ký tự.',
             'slug.unique' => 'Slug (đường dẫn) này đã tồn tại, vui lòng chọn tên khác.',
-            'type.in'     => 'Loại danh mục không hợp lệ.'
+            'type.in' => 'Loại danh mục không hợp lệ.'
         ]);
 
         $data = [
             'name' => $request->name,
-            'slug' => $request->slug, 
-            'type' => $request->type, 
+            'slug' => $request->slug,
+            'type' => $request->type,
             'image' => null,
         ];
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('categories', 'public');
-            $data['image'] = $imagePath;
+            $data['image'] = $this->imageService->upload($request->file('image'), 'categories');
         }
 
         Category::create($data);
@@ -113,7 +115,7 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Category  $category
+     * @param  Category  $category
      * @return \Illuminate\Http\Response
      */
     public function edit(Category $category)
@@ -125,8 +127,8 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category  $category
+     * @param  Request  $request
+     * @param  Category  $category
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Category $category)
@@ -136,25 +138,20 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'slug' => [
-                'required', 
-                'string', 
-                'max:255', 
+                'required',
+                'string',
+                'max:255',
                 Rule::unique('categories')->ignore($category->id)
             ],
-            'type'  => 'required|in:product,blog',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'type' => 'required|in:product,blog',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
         $data = $request->only(['name', 'slug', 'type']);
-        
+
 
         if ($request->hasFile('image')) {
-            if ($category->image) {
-                Storage::disk('public')->delete($category->image);
-            }
-
-            $imagePath = $request->file('image')->store('categories', 'public');
-            $data['image'] = $imagePath;
+            $data['image'] = $this->imageService->replace($request->file('image'), $category->image, 'categories');
         }
 
         $category->update($data);
@@ -166,17 +163,15 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Category  $category
+     * @param  Category  $category
      * @return \Illuminate\Http\Response
      */
     public function destroy(Category $category)
     {
         $this->authorize('delete', $category);
-        
-        if ($category->image) {
-            Storage::disk('public')->delete($category->image);
-        }
-        
+
+        $this->imageService->delete($category->image);
+
         $category->delete();
 
         return redirect()->route('admin.categories.index')

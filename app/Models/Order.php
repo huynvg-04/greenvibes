@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use function Symfony\Component\Translation\t;
 
 class Order extends Model
 {
@@ -35,11 +34,8 @@ class Order extends Model
         return $this->hasOne(OrderReturn::class);
     }
 
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
-        if (request()->is('admin/*')) {
-            return 'id';
-        }
         return 'code';
     }
 }

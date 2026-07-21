@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Models\PaymentMethod;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image;
+use App\Services\ImageUploadService;
 
 class PaymentMethodController extends Controller
 {
+    public function __construct(protected ImageUploadService $imageService) {}
     /**
      * Display a listing of the resource.
      *
@@ -50,29 +50,18 @@ class PaymentMethodController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:payment_methods,code',
             'sort_order' => 'integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = 'payment_methods/' . $filename;
-
-            try {
-                $image = Image::read($file);
-
-                $image->scale(width: 45);
-
-                $encodedImage = $image->toJpeg(80);
-
-                Storage::disk('public')->put($path, $encodedImage);
-                $data['image'] = $path;
-            } catch (\Exception $e) {
-                $data['image'] = $file->store('payment_methods', 'public');
-            }
+            $data['image'] = $this->imageService->upload(
+                $request->file('image'),
+                'payment_methods',
+                45   // nhỏ vì icon thanh toán
+            );
         }
 
         PaymentMethod::create($data);
@@ -119,31 +108,19 @@ class PaymentMethodController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:payment_methods,code,' . $payment->id,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
-            if ($payment->image && Storage::disk('public')->exists($payment->image)) {
-                Storage::disk('public')->delete($payment->image);
-            }
-
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = 'payment_methods/' . $filename;
-
-            try {
-                $image = Image::read($file);
-                $image->scale(width: 45);
-                $encodedImage = $image->toJpeg(80);
-
-                Storage::disk('public')->put($path, $encodedImage);
-                $data['image'] = $path;
-            } catch (\Exception $e) {
-                $data['image'] = $file->store('payment_methods', 'public');
-            }
+            $data['image'] = $this->imageService->replace(
+                $request->file('image'),
+                $payment->image,
+                'payment_methods',
+                45
+            );
         }
 
         $payment->update($data);
@@ -161,9 +138,7 @@ class PaymentMethodController extends Controller
     {
         $this->authorize('delete', $payment);
 
-        if ($payment->image && Storage::disk('public')->exists($payment->image)) {
-            Storage::disk('public')->delete($payment->image);
-        }
+        $this->imageService->delete($payment->image);
 
         $payment->delete();
         return back()->with('success', 'Xóa phương thức thanh toán.');

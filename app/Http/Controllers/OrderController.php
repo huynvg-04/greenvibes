@@ -13,11 +13,10 @@ use App\Models\OrderReturn;
 use App\Models\OrderReturnItem;
 use Illuminate\Support\Facades\Notification;
 use App\Services\InventoryService;
+use App\Services\ImageUploadService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image;
 use App\Notifications\NewReturnRequestNotification;
 
 class OrderController extends Controller
@@ -119,6 +118,7 @@ class OrderController extends Controller
             $order->save();
 
             foreach ($order->items as $item) {
+                // Hoàn lại tồn kho
                 if ($item->product_variant_id) {
                     InventoryService::log(
                         $item->product_variant_id,
@@ -132,6 +132,8 @@ class OrderController extends Controller
                         $item->product->increment('quantity', $item->quantity);
                     }
                 }
+
+                // Trừ sold_count (phải nằm trong foreach để xử lý TẤT CẢ sản phẩm)
                 if ($item->product) {
                     $item->product->decrement('sold_count', $item->quantity);
                 }
@@ -177,6 +179,11 @@ class OrderController extends Controller
             return back()->with('error', 'Đơn hàng chưa hoàn thành, không thể yêu cầu hoàn hàng.');
         }
 
+        $daysSinceCompleted = $order->updated_at->diffInDays(now());
+        if ($daysSinceCompleted > 7) {
+            return back()->with('error', 'Đã quá 7 ngày kể từ khi hoàn thành đơn hàng. Không thể yêu cầu hoàn hàng.');
+        }
+
         if ($order->returns()->where('status', 'pending')->exists()) {
             return back()->with('error', 'Đơn hàng này đang có yêu cầu hoàn hàng chờ xử lý.');
         }
@@ -193,6 +200,15 @@ class OrderController extends Controller
         if ($order->user_id !== Auth::id())
             abort(403);
 
+        if ($order->status !== 'completed') {
+            return back()->with('error', 'Đơn hàng chưa hoàn thành, không thể yêu cầu hoàn hàng.');
+        }
+
+        $daysSinceCompleted = $order->updated_at->diffInDays(now());
+        if ($daysSinceCompleted > 7) {
+            return back()->with('error', 'Đã quá 7 ngày kể từ khi hoàn thành đơn hàng. Không thể yêu cầu hoàn hàng.');
+        }
+
         $request->validate([
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -207,24 +223,16 @@ class OrderController extends Controller
         try {
             $imagePaths = [];
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = 'returns/' . $filename;
-
-                    try {
-                        $image = Image::read($file);
-                        $image->scale(width: 1000);
-                        $encodedImage = $image->toJpeg(80);
-                        Storage::disk('public')->put($path, $encodedImage);
-                        $imagePaths[] = $path;
-                    } catch (\Exception $e) {
-
-                        $imagePaths[] = $file->store('returns', 'public');
-                    }
-                }
+                /** @var ImageUploadService $imageService */
+                $imageService = app(ImageUploadService::class);
+                $imagePaths = $imageService->uploadMultiple(
+                    $request->file('images'),
+                    'returns',
+                    1000
+                );
             }
 
-            $orderReturn = OrderReturn::create([
+            $orderReturn = \App\Models\OrderReturn::create([
                 'order_id' => $order->id,
                 'user_id' => Auth::id(),
                 'reason' => $request->reason,
@@ -246,7 +254,7 @@ class OrderController extends Controller
                         $qtyToReturn = $orderItem->quantity;
                     }
 
-                    OrderReturnItem::create([
+                    \App\Models\OrderReturnItem::create([
                         'order_return_id' => $orderReturn->id,
                         'order_item_id' => $itemId,
                         'quantity' => $qtyToReturn

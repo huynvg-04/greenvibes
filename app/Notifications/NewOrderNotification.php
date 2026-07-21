@@ -44,7 +44,7 @@ class NewOrderNotification extends Notification
         return (new MailMessage)
             ->subject('Đơn hàng mới #' . $this->order->code)
             ->line('Khách hàng ' . $this->order->user->name . ' vừa đặt hàng.')
-            ->action('Xem đơn hàng', route('admin.orders.show', $this->order->id));
+            ->action('Xem đơn hàng', route('admin.orders.show', $this->order->code));
     }
 
     /**
@@ -56,9 +56,9 @@ class NewOrderNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            'order_id' => $this->order->id,
+            'order_id' => $this->order->code,
             'message' => 'Đơn hàng mới #' . $this->order->code . ' từ ' . $this->order->user->name,
-            'link' => route('admin.orders.show', $this->order->id),
+            'link' => route('admin.orders.show', $this->order->code),
             'icon' => 'bx bx-cart', 
             'color' => 'success'
         ];

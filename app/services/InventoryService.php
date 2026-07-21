@@ -11,13 +11,11 @@ use Exception;
 class InventoryService
 {
     /**
-     * Ghi nhận giao dịch kho (Nhập/Xuất/Điều chỉnh)
-     *
-     * @param int $variantId ID của phân loại sản phẩm
-     * @param int $quantity Số lượng thay đổi (Luôn nhập số dương)
-     * @param string $type Loại giao dịch: 'in' (Nhập) hoặc 'out' (Xuất)
-     * @param string $description Ghi chú chi tiết (VD: "Bán đơn hàng #123")
-     * @param mixed $reference Model liên quan (VD: $order, $importNote) - Có thể null
+     * @param int $variantId 
+     * @param int $quantity 
+     * @param string $type 
+     * @param string $description 
+     * @param mixed $reference 
      * * @return WarehouseTransaction
      * @throws Exception
      */
@@ -31,8 +29,6 @@ class InventoryService
             throw new Exception("Loại giao dịch không hợp lệ (chỉ chấp nhận 'in' hoặc 'out').");
         }
 
-        
-
         return DB::transaction(function () use ($variantId, $quantity, $type, $description, $reference) {
 
             $variant = ProductVariant::lockForUpdate()->find($variantId);
@@ -44,7 +40,7 @@ class InventoryService
 
             if ($type === 'in') {
                 $variant->stock = $currentStock + $quantity;
-            } else {    
+            } else {
                 if ($currentStock < $quantity) {
                     throw new Exception("Kho không đủ hàng để xuất! (Tồn: {$currentStock}, Cần: {$quantity}) - SKU: {$variant->sku}");
                 }
@@ -57,7 +53,7 @@ class InventoryService
                 'product_variant_id' => $variantId,
                 'type' => $type,
                 'quantity' => $quantity,
-                'balance_after' => $variant->stock, 
+                'balance_after' => $variant->stock,
                 'user_id' => Auth::id(),
                 'description' => $description,
                 'reference_type' => $reference ? get_class($reference) : null,

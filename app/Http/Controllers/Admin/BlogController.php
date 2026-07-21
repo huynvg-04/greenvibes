@@ -8,13 +8,16 @@ use App\Models\Category;
 use App\Http\Requests\StoreBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Services\ImageUploadService;
 
 class BlogController extends Controller
 {
+    public function __construct(protected ImageUploadService $imageService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -27,16 +30,14 @@ class BlogController extends Controller
         $categories = Category::where('type', 'blog')->get();
 
         $stats = [
-            'total'     => Blog::count(),
+            'total' => Blog::count(),
             'published' => Blog::where('is_published', true)->count(),
-            'draft'     => Blog::where('is_published', false)->count(),
-            'views'     => Blog::sum('views')
+            'draft' => Blog::where('is_published', false)->count(),
+            'views' => Blog::sum('views')
         ];
 
-        // Khởi tạo query ban đầu
         $query = Blog::with(['user', 'category']);
 
-        // 1. LỌC THEO TỪ KHÓA
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {
@@ -45,31 +46,27 @@ class BlogController extends Controller
             });
         }
 
-        // 2. LỌC THEO TRẠNG THÁI
         if ($request->has('is_published') && $request->is_published !== null && $request->is_published !== '') {
             $query->where('is_published', $request->is_published);
         }
 
-        // 3. [MỚI] SẮP XẾP (SORT)
-        // Mặc định là 'latest' (Mới nhất)
         $sort = $request->input('sort', 'latest');
 
         switch ($sort) {
             case 'views_desc':
-                $query->orderBy('views', 'desc'); // Xem nhiều nhất
+                $query->orderBy('views', 'desc');
                 break;
             case 'views_asc':
-                $query->orderBy('views', 'asc');  // Xem ít nhất
+                $query->orderBy('views', 'asc');
                 break;
             case 'oldest':
-                $query->oldest(); // Cũ nhất
+                $query->oldest();
                 break;
             default:
-                $query->latest(); // Mới nhất (mặc định)
+                $query->latest();
                 break;
         }
 
-        // 4. PHÂN TRANG
         $perPage = $request->input('per_page', 10);
         $allowedPerPage = [10, 20, 50, 100];
         if (!in_array($perPage, $allowedPerPage)) {
@@ -99,7 +96,7 @@ class BlogController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\StoreBlogRequest  $request
+     * @param  Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -107,11 +104,11 @@ class BlogController extends Controller
         $this->authorize('create', Blog::class);
 
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'slug'        => 'required|string|max:255|unique:blogs,slug',
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blogs,slug',
             'category_id' => 'required|exists:categories,id',
-            'content'     => 'required',
-            'thumbnail'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'content' => 'required',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
         ], [
             'title.required' => 'Tiêu đề không được để trống.',
             'title.string' => 'Tiêu đề không hợp lệ',
@@ -140,8 +137,7 @@ class BlogController extends Controller
         $data['is_published'] = $request->has('is_published');
 
         if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('blogs', 'public');
-            $data['thumbnail'] = $path;
+            $data['thumbnail'] = $this->imageService->upload($request->file('thumbnail'), 'blogs');
         }
 
         Blog::create($data);
@@ -153,7 +149,7 @@ class BlogController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  Blog  $blog
      * @return \Illuminate\Http\Response
      */
     public function show(Blog $blog)
@@ -165,7 +161,7 @@ class BlogController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  Blog  $blog
      * @return \Illuminate\Http\Response
      */
     public function edit(Blog $blog)
@@ -180,8 +176,8 @@ class BlogController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\UpdateBlogRequest  $request
-     * @param  int  $id
+     * @param  Request  $request
+     * @param  Blog  $blog
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Blog $blog)
@@ -189,11 +185,11 @@ class BlogController extends Controller
         $this->authorize('update', $blog);
 
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'slug'        => 'required|string|unique:blogs,slug,' . $blog->id,
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|unique:blogs,slug,' . $blog->id,
             'category_id' => 'nullable|exists:categories,id',
-            'content'     => 'required',
-            'thumbnail'   => 'nullable|image|max:2048',
+            'content' => 'required',
+            'thumbnail' => 'nullable|image|max:10240',
         ], [
             'title.required' => 'Tiêu đề không được để trống.',
             'title.string' => 'Tiêu đề không hợp lệ',
@@ -215,11 +211,7 @@ class BlogController extends Controller
         $data['is_published'] = $request->has('is_published');
 
         if ($request->hasFile('thumbnail')) {
-            if ($blog->thumbnail) {
-                Storage::disk('public')->delete($blog->thumbnail);
-            }
-            $path = $request->file('thumbnail')->store('blogs', 'public');
-            $data['thumbnail'] = $path;
+            $data['thumbnail'] = $this->imageService->replace($request->file('thumbnail'), $blog->thumbnail, 'blogs');
         }
 
         $blog->update($data);
@@ -230,16 +222,14 @@ class BlogController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Blog  $blog
      * @return \Illuminate\Http\Response
      */
     public function destroy(Blog $blog)
     {
         $this->authorize('delete', $blog);
 
-        if ($blog->thumbnail) {
-            Storage::disk('public')->delete($blog->thumbnail);
-        }
+        $this->imageService->delete($blog->thumbnail);
 
         $blog->delete();
 

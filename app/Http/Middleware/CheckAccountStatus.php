@@ -12,9 +12,9 @@ class CheckAccountStatus
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @param  Request  $request
+     * @param  Closure(Request): (Response|RedirectResponse)  $next
+     * @return Response|RedirectResponse
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -32,17 +32,17 @@ class CheckAccountStatus
             }
 
             if ($isUserBlocked || $isProfileBlocked) {
-                
-                Auth::logout(); 
+
+                Auth::logout();
 
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
                 if ($request->is('admin/*')) {
-                     return redirect()->route('auth.admin-login')->with('error', 'Tài khoản của bạn đã bị khóa quyền truy cập.');
+                    return redirect()->route('auth.admin-login')->with('error', 'Tài khoản của bạn đã bị khóa quyền truy cập.');
                 }
-                
-                return redirect()->route('login')->with('success', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ CSKH.');
+
+                return redirect()->route('login')->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ CSKH.');
             }
         }
 

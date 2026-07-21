@@ -50,10 +50,11 @@ class Blog extends Model
 
         return $this->likes()->where('user_id', Auth::id())->exists();
     }
-    
+
     public function getRouteKeyName()
     {
-        if (request()->is('admin/*')) {
+        $request = request();
+        if ($request && $request->is('admin/*')) {
             return 'id';
         }
         return 'slug';

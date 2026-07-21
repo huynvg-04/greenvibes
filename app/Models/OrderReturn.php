@@ -26,4 +26,20 @@ class OrderReturn extends Model
     public function user() {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Dùng order code (ORD-XXXXXX) làm route key thay vì id số nguyên.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'order_code';
+    }
+
+    /**
+     * Resolve route binding theo order.code (join qua bảng orders).
+     */
+    public function resolveRouteBinding($value, $field = null): ?static
+    {
+        return static::whereHas('order', fn($q) => $q->where('code', $value))->first();
+    }
 }
